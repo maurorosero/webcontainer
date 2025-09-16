@@ -40,6 +40,7 @@ Esta guía te ayudará a resolver problemas comunes del sistema web local con Tr
 **Síntomas**: No se puede acceder a `*.local`
 
 **Solución**:
+
 ```bash
 # Verificar DNS local
 nslookup whoami.local
@@ -59,6 +60,7 @@ resolvectl status
 **Síntomas**: Dominios `.local` no resuelven correctamente
 
 **Solución**:
+
 ```bash
 # Verificar configuración de systemd-resolved
 cat /etc/systemd/resolved.conf.d/90-local-dev.conf
@@ -78,6 +80,7 @@ nslookup whoami.local
 **Síntomas**: dnsmasq no está funcionando
 
 **Solución**:
+
 ```bash
 # Verificar estado de dnsmasq
 ./scripts/container-utils.sh ps | grep dnsmasq
@@ -96,6 +99,7 @@ nslookup whoami.local
 **Síntomas**: Error al detectar Podman o Docker
 
 **Solución**:
+
 ```bash
 # Verificar motor de contenedores
 ./scripts/container-utils.sh detect
@@ -112,6 +116,7 @@ sudo systemctl start docker  # o podman
 **Síntomas**: Aplicación no accesible
 
 **Solución**:
+
 ```bash
 # Verificar estado de contenedores
 ./scripts/web-manager.sh health
@@ -128,6 +133,7 @@ sudo systemctl start docker  # o podman
 **Síntomas**: Contenedores no pueden comunicarse
 
 **Solución**:
+
 ```bash
 # Verificar redes existentes
 ./scripts/container-utils.sh network ls
@@ -144,6 +150,7 @@ sudo systemctl start docker  # o podman
 **Síntomas**: Puerto ya está siendo usado por otro proceso
 
 **Solución**:
+
 ```bash
 # Verificar puertos en uso
 netstat -tlnp | grep :8080
@@ -164,6 +171,7 @@ netstat -tlnp | grep :8081
 **Síntomas**: El navegador muestra warnings de certificado no válido
 
 **Solución**:
+
 ```bash
 # Verificar configuración de Traefik
 ./scripts/container-utils.sh logs web-traefik
@@ -180,6 +188,7 @@ curl -k https://whoami.local:8443
 **Síntomas**: Traefik no está generando certificados SSL automáticamente
 
 **Solución**:
+
 ```bash
 # Verificar configuración de Traefik
 cat config/traefik.yml
@@ -188,7 +197,7 @@ cat config/traefik.yml
 ./scripts/container-utils.sh logs web-traefik
 
 # Reiniciar Traefik
-./scripts/container-utils.sh restart web-traefik
+./scripts/web-manager.sh restart
 ```
 
 ## 📱 Problemas de Aplicaciones
@@ -198,6 +207,7 @@ cat config/traefik.yml
 **Síntomas**: Aplicación no accesible a través de Traefik
 
 **Solución**:
+
 ```bash
 # Verificar aplicaciones publicadas
 ./scripts/publish-app.sh list
@@ -214,6 +224,7 @@ cat config/traefik.yml
 **Síntomas**: Error al detectar tipo de aplicación
 
 **Solución**:
+
 ```bash
 # Verificar archivos indicadores
 ls -la /path/to/app/
@@ -227,6 +238,7 @@ ls -la /path/to/app/
 **Síntomas**: Puerto ya en uso
 
 **Solución**:
+
 ```bash
 # Verificar puertos en uso
 netstat -tlnp | grep :3000
@@ -242,6 +254,7 @@ netstat -tlnp | grep :3000
 **Síntomas**: Traefik no está funcionando
 
 **Solución**:
+
 ```bash
 # Verificar estado de Traefik
 ./scripts/container-utils.sh ps | grep traefik
@@ -258,6 +271,7 @@ netstat -tlnp | grep :3000
 **Síntomas**: Error al cargar configuración
 
 **Solución**:
+
 ```bash
 # Verificar configuración
 cat config/traefik.yml
@@ -274,6 +288,7 @@ cat config/dynamic.yml
 **Síntomas**: No se puede acceder al dashboard de Traefik
 
 **Solución**:
+
 ```bash
 # Verificar que Traefik esté ejecutándose
 ./scripts/container-utils.sh ps | grep traefik
@@ -292,6 +307,7 @@ curl http://localhost:8081
 **Síntomas**: No se puede escribir en directorios
 
 **Solución**:
+
 ```bash
 # Verificar permisos
 ls -la scripts/
@@ -309,6 +325,7 @@ chmod 755 logs/
 **Síntomas**: Archivos de configuración faltantes
 
 **Solución**:
+
 ```bash
 # Verificar estructura de directorios
 ls -la
@@ -326,6 +343,7 @@ ls -la logs/
 **Síntomas**: Respuesta lenta del sistema
 
 **Solución**:
+
 ```bash
 # Verificar uso de recursos
 ./scripts/container-utils.sh stats
@@ -342,6 +360,7 @@ ls -la logs/
 **Síntomas**: Contenedores se detienen por falta de memoria
 
 **Solución**:
+
 ```bash
 # Verificar memoria disponible
 free -h

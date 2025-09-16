@@ -59,10 +59,10 @@ EOF
 ./scripts/publish-app.sh publish /tmp/my-nodejs-app my-nodejs-app my-nodejs-app.local 3000 "Mi Aplicación Node.js" "/health"
 ```
 
-### Acceder a la Aplicación
+### Acceder a la Aplicación Node.js
 
-- **URL**: https://my-nodejs-app.local:8443
-- **Health Check**: https://my-nodejs-app.local:8443/health
+- **URL**: [https://my-nodejs-app.local:8443](https://my-nodejs-app.local:8443)
+- **Health Check**: [https://my-nodejs-app.local:8443/health](https://my-nodejs-app.local:8443/health)
 
 ## 🚀 Ejemplo 2: Aplicación React
 
@@ -93,16 +93,16 @@ export default defineConfig({
 EOF
 ```
 
-### Publicar Aplicación
+### Publicar Aplicación React
 
 ```bash
 # Publicar aplicación React
 ./scripts/publish-app.sh publish /tmp/my-react-app my-react-app my-react-app.local 3000 "Mi Aplicación React" "/"
 ```
 
-### Acceder a la Aplicación
+### Acceder a la Aplicación React
 
-- **URL**: https://my-react-app.local:8443
+- **URL**: [https://my-react-app.local:8443](https://my-react-app.local:8443)
 
 ## 🚀 Ejemplo 3: Aplicación PHP
 
@@ -139,17 +139,17 @@ echo json_encode(['status' => 'healthy']);
 EOF
 ```
 
-### Publicar Aplicación
+### Publicar Aplicación PHP
 
 ```bash
 # Publicar aplicación PHP
 ./scripts/publish-app.sh publish /tmp/my-php-app my-php-app my-php-app.local 80 "Mi Aplicación PHP" "/health.php"
 ```
 
-### Acceder a la Aplicación
+### Acceder a la Aplicación PHP
 
-- **URL**: https://my-php-app.local:8443
-- **Health Check**: https://my-php-app.local:8443/health.php
+- **URL**: [https://my-php-app.local:8443](https://my-php-app.local:8443)
+- **Health Check**: [https://my-php-app.local:8443/health.php](https://my-php-app.local:8443/health.php)
 
 ## 🚀 Ejemplo 4: Aplicación Python
 
@@ -191,17 +191,17 @@ if __name__ == '__main__':
 EOF
 ```
 
-### Publicar Aplicación
+### Publicar Aplicación Python
 
 ```bash
 # Publicar aplicación Python
 ./scripts/publish-app.sh publish /tmp/my-python-app my-python-app my-python-app.local 5000 "Mi Aplicación Python" "/health"
 ```
 
-### Acceder a la Aplicación
+### Acceder a la Aplicación Python
 
-- **URL**: https://my-python-app.local:8443
-- **Health Check**: https://my-python-app.local:8443/health
+- **URL**: [https://my-python-app.local:8443](https://my-python-app.local:8443)
+- **Health Check**: [https://my-python-app.local:8443/health](https://my-python-app.local:8443/health)
 
 ## 🚀 Ejemplo 5: Sitio Web Estático
 
@@ -267,16 +267,16 @@ cat > index.html << EOF
 EOF
 ```
 
-### Publicar Aplicación
+### Publicar Sitio Estático
 
 ```bash
 # Publicar sitio estático
 ./scripts/publish-app.sh publish /tmp/my-static-site my-static-site my-static-site.local 80 "Mi Sitio Estático" "/"
 ```
 
-### Acceder a la Aplicación
+### Acceder al Sitio Estático
 
-- **URL**: https://my-static-site.local:8443
+- **URL**: [https://my-static-site.local:8443](https://my-static-site.local:8443)
 
 ## 🔍 Verificar Aplicaciones
 
