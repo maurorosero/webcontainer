@@ -1,6 +1,6 @@
-# Sistema Web Local Completo con Traefik
+# WebDevs - Sistema Web Local Completo con Traefik
 
-Sistema completo para desarrollo web local con Traefik como proxy reverso, **dominios .local automáticos** (sin modificar /etc/hosts), gestión automática de aplicaciones externas y soporte para Podman/Docker.
+**WebDevs** es un sistema completo para desarrollo web local con Traefik como proxy reverso, **dominios .local automáticos** (sin modificar /etc/hosts), gestión automática de aplicaciones externas y soporte para Podman/Docker.
 
 ## 🚀 Características Principales
 
@@ -67,7 +67,7 @@ nslookup whoami.local
 ## 📁 Estructura del Proyecto
 
 ```text
-web/                                 # Plataforma web completa
+webdevs/                            # Plataforma web completa
 ├── scripts/                          # Scripts de gestión
 │   ├── web-manager.sh               # Gestión principal del sistema
 │   ├── setup-host.sh                # Configuración automática del host
