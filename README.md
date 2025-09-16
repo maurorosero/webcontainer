@@ -259,7 +259,17 @@ Para contribuir al proyecto:
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la Licencia Pública General de GNU v3.0 (GPLv3). Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+### Resumen de la Licencia GPLv3
+
+- ✅ **Uso libre**: Puedes usar, modificar y distribuir el software
+- ✅ **Código abierto**: El código fuente debe estar disponible
+- ✅ **Copyleft**: Las modificaciones deben mantener la misma licencia
+- ✅ **Sin garantías**: El software se proporciona "tal como está"
+- ✅ **Atribución**: Debes mantener los avisos de copyright
+
+Para más información sobre GPLv3, visita: [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ## 🆘 Soporte
 
