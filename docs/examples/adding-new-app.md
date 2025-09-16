@@ -1,6 +1,6 @@
 # Ejemplo: Agregar Nueva Aplicación
 
-Este ejemplo te muestra cómo agregar una nueva aplicación al sistema web local.
+Este ejemplo te muestra cómo agregar una nueva aplicación al sistema web local con Traefik.
 
 ## 🚀 Ejemplo 1: Aplicación Node.js
 
@@ -56,13 +56,13 @@ EOF
 
 ```bash
 # Publicar aplicación
-./scripts/publish-app.sh publish /tmp/my-nodejs-app my-nodejs-app my-nodejs-app.local.dev 3000 "Mi Aplicación Node.js" "/health"
+./scripts/publish-app.sh publish /tmp/my-nodejs-app my-nodejs-app my-nodejs-app.local 3000 "Mi Aplicación Node.js" "/health"
 ```
 
 ### Acceder a la Aplicación
 
-- **URL**: https://my-nodejs-app.local.dev
-- **Health Check**: https://my-nodejs-app.local.dev/health
+- **URL**: https://my-nodejs-app.local:8443
+- **Health Check**: https://my-nodejs-app.local:8443/health
 
 ## 🚀 Ejemplo 2: Aplicación React
 
@@ -97,12 +97,12 @@ EOF
 
 ```bash
 # Publicar aplicación React
-./scripts/publish-app.sh publish /tmp/my-react-app my-react-app my-react-app.local.dev 3000 "Mi Aplicación React" "/"
+./scripts/publish-app.sh publish /tmp/my-react-app my-react-app my-react-app.local 3000 "Mi Aplicación React" "/"
 ```
 
 ### Acceder a la Aplicación
 
-- **URL**: https://my-react-app.local.dev
+- **URL**: https://my-react-app.local:8443
 
 ## 🚀 Ejemplo 3: Aplicación PHP
 
@@ -143,13 +143,13 @@ EOF
 
 ```bash
 # Publicar aplicación PHP
-./scripts/publish-app.sh publish /tmp/my-php-app my-php-app my-php-app.local.dev 80 "Mi Aplicación PHP" "/health.php"
+./scripts/publish-app.sh publish /tmp/my-php-app my-php-app my-php-app.local 80 "Mi Aplicación PHP" "/health.php"
 ```
 
 ### Acceder a la Aplicación
 
-- **URL**: https://my-php-app.local.dev
-- **Health Check**: https://my-php-app.local.dev/health.php
+- **URL**: https://my-php-app.local:8443
+- **Health Check**: https://my-php-app.local:8443/health.php
 
 ## 🚀 Ejemplo 4: Aplicación Python
 
@@ -195,13 +195,13 @@ EOF
 
 ```bash
 # Publicar aplicación Python
-./scripts/publish-app.sh publish /tmp/my-python-app my-python-app my-python-app.local.dev 5000 "Mi Aplicación Python" "/health"
+./scripts/publish-app.sh publish /tmp/my-python-app my-python-app my-python-app.local 5000 "Mi Aplicación Python" "/health"
 ```
 
 ### Acceder a la Aplicación
 
-- **URL**: https://my-python-app.local.dev
-- **Health Check**: https://my-python-app.local.dev/health
+- **URL**: https://my-python-app.local:8443
+- **Health Check**: https://my-python-app.local:8443/health
 
 ## 🚀 Ejemplo 5: Sitio Web Estático
 
@@ -256,7 +256,7 @@ cat > index.html << EOF
             <p><strong>Estado:</strong> Funcionando</p>
             <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
         </div>
-        <p>¡Este es un sitio web estático servido a través de Caddy con certificados SSL válidos!</p>
+        <p>¡Este es un sitio web estático servido a través de Traefik con certificados SSL automáticos!</p>
     </div>
     
     <script>
@@ -271,12 +271,12 @@ EOF
 
 ```bash
 # Publicar sitio estático
-./scripts/publish-app.sh publish /tmp/my-static-site my-static-site my-static-site.local.dev 80 "Mi Sitio Estático" "/"
+./scripts/publish-app.sh publish /tmp/my-static-site my-static-site my-static-site.local 80 "Mi Sitio Estático" "/"
 ```
 
 ### Acceder a la Aplicación
 
-- **URL**: https://my-static-site.local.dev
+- **URL**: https://my-static-site.local:8443
 
 ## 🔍 Verificar Aplicaciones
 
@@ -294,14 +294,14 @@ EOF
 ./scripts/publish-app.sh check
 ```
 
-### Verificar Certificados SSL
+### Verificar Estado del Sistema
 
 ```bash
-# Verificar certificado específico
-./scripts/verify-ssl.sh verify-browser my-nodejs-app.local.dev
+# Verificar estado completo del sistema
+./scripts/web-manager.sh status
 
-# Verificar todos los certificados
-./scripts/verify-ssl.sh verify-all
+# Verificar salud de servicios
+./scripts/web-manager.sh health
 ```
 
 ## 🗑️ Limpiar Aplicaciones
@@ -317,7 +317,7 @@ EOF
 
 ```bash
 # Limpiar recursos del sistema
-./scripts/web-manager.sh cleanup
+./scripts/web-manager.sh clean
 ```
 
 ## 🛠️ Solución de Problemas
@@ -329,23 +329,23 @@ EOF
 ./scripts/web-manager.sh health
 
 # Ver logs de aplicación específica
-./scripts/container-utils.sh logs web-my-nodejs-app  # Usa el wrapper automático
+./scripts/container-utils.sh logs web-my-nodejs-app
 
-# Verificar configuración de Caddy
-docker exec web-caddy caddy config --config /etc/caddy/Caddyfile
+# Verificar configuración de Traefik
+./scripts/container-utils.sh logs web-traefik
 ```
 
-### Certificado No Válido
+### DNS No Resuelve
 
 ```bash
-# Verificar certificados
-./scripts/cert-manager.sh verify
+# Verificar DNS local
+nslookup my-nodejs-app.local
 
-# Reinstalar CA
-./scripts/cert-manager.sh install-ca
+# Reconfigurar DNS automáticamente
+./scripts/setup-host.sh
 
-# Verificar certificado específico
-./scripts/verify-ssl.sh verify-browser my-app.local.dev
+# Verificar estado de dnsmasq
+./scripts/container-utils.sh logs web-dnsmasq
 ```
 
 ### Puerto en Uso
@@ -367,4 +367,4 @@ netstat -tlnp | grep :3000
 
 ---
 
-**¡Disfruta desarrollando con certificados SSL válidos y sin warnings en el navegador!** 🎉
+**¡Disfruta desarrollando con dominios .local automáticos y certificados SSL sin warnings!** 🎉

@@ -1,6 +1,6 @@
 # Solución de Problemas
 
-Esta guía te ayudará a resolver problemas comunes del sistema web local.
+Esta guía te ayudará a resolver problemas comunes del sistema web local con Traefik.
 
 ## 🔍 Diagnóstico General
 
@@ -23,58 +23,70 @@ Esta guía te ayudará a resolver problemas comunes del sistema web local.
 # Ver logs de todos los servicios
 ./scripts/web-manager.sh logs
 
-# Ver logs de Caddy específicamente
-./scripts/web-manager.sh logs caddy
+# Ver logs de Traefik específicamente
+./scripts/web-manager.sh logs traefik
+
+# Ver logs de dnsmasq específicamente
+./scripts/web-manager.sh logs dnsmasq
 
 # Ver logs de aplicación específica
 ./scripts/web-manager.sh logs app-registry
 ```
 
-## 🔒 Problemas de Certificados SSL
+## 🌐 Problemas de DNS Local
 
-### Error: "Certificado no válido" en el navegador
+### Error: "Dominio no resuelve"
 
-**Síntomas**: El navegador muestra warnings de certificado no válido
+**Síntomas**: No se puede acceder a `*.local`
 
 **Solución**:
 ```bash
-# Verificar CA instalada
-./scripts/verify-ssl.sh verify-ca
+# Verificar DNS local
+nslookup whoami.local
 
-# Reinstalar CA si es necesario
-./scripts/cert-manager.sh install-ca
+# Verificar configuración de systemd-resolved
+resolvectl status
 
-# Verificar certificado específico
-./scripts/verify-ssl.sh verify-browser myapp.local.dev
+# Reconfigurar DNS automáticamente
+./scripts/setup-host.sh
+
+# Verificar que dnsmasq esté ejecutándose
+./scripts/container-utils.sh ps | grep dnsmasq
 ```
 
-### Error: "CA no encontrada"
+### Error: "DNS no configurado"
 
-**Síntomas**: Error al verificar certificados
+**Síntomas**: Dominios `.local` no resuelven correctamente
 
 **Solución**:
 ```bash
-# Regenerar CA
-./scripts/cert-manager.sh generate-ca
+# Verificar configuración de systemd-resolved
+cat /etc/systemd/resolved.conf.d/90-local-dev.conf
 
-# Regenerar certificado wildcard
-./scripts/cert-manager.sh generate-wildcard
+# Reconfigurar DNS automáticamente
+./scripts/setup-host.sh
 
-# Reinstalar CA
-./scripts/cert-manager.sh install-ca
+# Reiniciar systemd-resolved
+sudo systemctl restart systemd-resolved
+
+# Probar resolución
+nslookup whoami.local
 ```
 
-### Error: "Certificado expirado"
+### Error: "dnsmasq no responde"
 
-**Síntomas**: Certificados expirados
+**Síntomas**: dnsmasq no está funcionando
 
 **Solución**:
 ```bash
-# Renovar certificados
-./scripts/cert-manager.sh renew
+# Verificar estado de dnsmasq
+./scripts/container-utils.sh ps | grep dnsmasq
 
-# Regenerar certificado wildcard
-./scripts/cert-manager.sh generate-wildcard
+# Reiniciar dnsmasq
+./scripts/container-utils.sh restart web-dnsmasq
+
+# Ver logs de dnsmasq
+./scripts/container-utils.sh logs web-dnsmasq
 ```
 
 ## 🐳 Problemas de Contenedores
@@ -89,7 +101,7 @@ Esta guía te ayudará a resolver problemas comunes del sistema web local.
 ./scripts/container-utils.sh detect
 
 # Verificar que Docker/Podman esté ejecutándose
-docker info  # o podman info
+./scripts/container-utils.sh info
 
 # Reiniciar servicio si es necesario
 sudo systemctl start docker  # o podman
@@ -108,7 +120,7 @@ sudo systemctl start docker  # o podman
 ./scripts/web-manager.sh restart
 
 # Ver logs de contenedor específico
-./scripts/container-utils.sh logs web-myapp  # Usa el wrapper automático
+./scripts/container-utils.sh logs web-myapp
 ```
 
 ### Error: "Red no encontrada"
@@ -117,53 +129,73 @@ sudo systemctl start docker  # o podman
 
 **Solución**:
 ```bash
-# Crear red manualmente
-docker network create --subnet 172.20.0.0/16 web-dev-network
+# Verificar redes existentes
+./scripts/container-utils.sh network ls
 
-# O con Podman
-podman network create --subnet 172.20.0.0/16 web-dev-network
+# Crear red manualmente si es necesario
+./scripts/container-utils.sh network create web-dev-network 172.25.0.0/16
 
 # Reiniciar servicios
 ./scripts/web-manager.sh restart
 ```
 
-## 🌐 Problemas de DNS
+### Error: "Puerto ya en uso"
 
-### Error: "Dominio no resuelve"
-
-**Síntomas**: No se puede acceder a `*.local.dev`
+**Síntomas**: Puerto ya está siendo usado por otro proceso
 
 **Solución**:
 ```bash
-# Verificar DNS local
-nslookup local.dev
+# Verificar puertos en uso
+netstat -tlnp | grep :8080
+netstat -tlnp | grep :8443
+netstat -tlnp | grep :8081
 
-# Reconfigurar DNS
-./scripts/cert-manager.sh setup-dns
+# Detener servicios conflictivos
+./scripts/web-manager.sh down
 
-# Verificar /etc/hosts
-cat /etc/hosts | grep local.dev
+# Reiniciar servicios
+./scripts/web-manager.sh up
 ```
 
-### Error: "DNS no configurado"
+## 🔒 Problemas de SSL/TLS
 
-**Síntomas**: Dominios no resuelven correctamente
+### Error: "Certificado no válido" en el navegador
+
+**Síntomas**: El navegador muestra warnings de certificado no válido
 
 **Solución**:
 ```bash
-# Configurar DNS manualmente
-echo "127.0.0.1 local.dev" | sudo tee -a /etc/hosts
-echo "127.0.0.1 *.local.dev" | sudo tee -a /etc/hosts
+# Verificar configuración de Traefik
+./scripts/container-utils.sh logs web-traefik
 
-# O usar el script
-./scripts/cert-manager.sh setup-dns
+# Reiniciar Traefik
+./scripts/container-utils.sh restart web-traefik
+
+# Verificar que Traefik esté generando certificados automáticamente
+curl -k https://whoami.local:8443
+```
+
+### Error: "Traefik no genera certificados"
+
+**Síntomas**: Traefik no está generando certificados SSL automáticamente
+
+**Solución**:
+```bash
+# Verificar configuración de Traefik
+cat config/traefik.yml
+
+# Verificar logs de Traefik
+./scripts/container-utils.sh logs web-traefik
+
+# Reiniciar Traefik
+./scripts/container-utils.sh restart web-traefik
 ```
 
 ## 📱 Problemas de Aplicaciones
 
 ### Error: "Aplicación no publicada"
 
-**Síntomas**: Aplicación no accesible a través de Caddy
+**Síntomas**: Aplicación no accesible a través de Traefik
 
 **Solución**:
 ```bash
@@ -174,7 +206,7 @@ echo "127.0.0.1 *.local.dev" | sudo tee -a /etc/hosts
 ./scripts/publish-app.sh check
 
 # Republicar aplicación
-./scripts/publish-app.sh publish /path/to/app app-name
+./scripts/publish-app.sh publish /path/to/app app-name app-name.local 3000 "Mi Aplicación" "/health"
 ```
 
 ### Error: "Tipo de aplicación no detectado"
@@ -203,38 +235,54 @@ netstat -tlnp | grep :3000
 ./scripts/publish-app.sh publish /path/to/app app-name domain 3001
 ```
 
-## 🔧 Problemas de Caddy
+## 🔧 Problemas de Traefik
 
-### Error: "Caddy no responde"
+### Error: "Traefik no responde"
 
-**Síntomas**: Caddy no está funcionando
+**Síntomas**: Traefik no está funcionando
 
 **Solución**:
 ```bash
-# Verificar estado de Caddy
-docker ps | grep caddy  # o podman ps | grep caddy
+# Verificar estado de Traefik
+./scripts/container-utils.sh ps | grep traefik
 
-# Reiniciar Caddy
-docker restart web-caddy  # o podman restart web-caddy
+# Reiniciar Traefik
+./scripts/container-utils.sh restart web-traefik
 
-# Ver logs de Caddy
-./scripts/container-utils.sh logs web-caddy  # Usa el wrapper automático
+# Ver logs de Traefik
+./scripts/container-utils.sh logs web-traefik
 ```
 
-### Error: "Configuración de Caddy inválida"
+### Error: "Configuración de Traefik inválida"
 
 **Síntomas**: Error al cargar configuración
 
 **Solución**:
 ```bash
 # Verificar configuración
-docker exec web-caddy caddy validate --config /etc/caddy/Caddyfile
+cat config/traefik.yml
 
-# Recargar configuración
-docker exec web-caddy caddy reload --config /etc/caddy/Caddyfile
+# Verificar configuración dinámica
+cat config/dynamic.yml
 
-# Reiniciar Caddy
+# Reiniciar Traefik
 ./scripts/web-manager.sh restart
+```
+
+### Error: "Dashboard de Traefik no accesible"
+
+**Síntomas**: No se puede acceder al dashboard de Traefik
+
+**Solución**:
+```bash
+# Verificar que Traefik esté ejecutándose
+./scripts/container-utils.sh ps | grep traefik
+
+# Verificar puerto del dashboard
+netstat -tlnp | grep :8081
+
+# Acceder al dashboard
+curl http://localhost:8081
 ```
 
 ## 🗂️ Problemas de Archivos y Permisos
@@ -247,13 +295,13 @@ docker exec web-caddy caddy reload --config /etc/caddy/Caddyfile
 ```bash
 # Verificar permisos
 ls -la scripts/
-ls -la certs/
 ls -la config/
+ls -la logs/
 
 # Corregir permisos
 chmod +x scripts/*.sh
-chmod 755 certs/
 chmod 755 config/
+chmod 755 logs/
 ```
 
 ### Error: "Archivo no encontrado"
@@ -265,7 +313,7 @@ chmod 755 config/
 # Verificar estructura de directorios
 ls -la
 ls -la config/
-ls -la certs/
+ls -la logs/
 
 # Recrear archivos faltantes
 ./scripts/web-manager.sh init
@@ -280,10 +328,10 @@ ls -la certs/
 **Solución**:
 ```bash
 # Verificar uso de recursos
-docker stats  # o podman stats
+./scripts/container-utils.sh stats
 
 # Limpiar recursos
-./scripts/web-manager.sh cleanup
+./scripts/web-manager.sh clean
 
 # Reiniciar servicios
 ./scripts/web-manager.sh restart
@@ -299,7 +347,7 @@ docker stats  # o podman stats
 free -h
 
 # Limpiar contenedores no utilizados
-docker system prune -f  # o podman system prune -f
+./scripts/container-utils.sh system prune
 
 # Reiniciar servicios
 ./scripts/web-manager.sh restart
@@ -311,10 +359,10 @@ docker system prune -f  # o podman system prune -f
 
 ```bash
 # Detener todo
-./scripts/web-manager.sh stop
+./scripts/web-manager.sh down
 
 # Limpiar recursos
-./scripts/web-manager.sh cleanup
+./scripts/web-manager.sh clean
 
 # Reinicializar sistema completo
 ./scripts/web-manager.sh init
@@ -330,17 +378,14 @@ ls -la backups/
 ./scripts/web-manager.sh restore backups/20240115_103000
 ```
 
-### Reinstalar CA
+### Restaurar configuración del host
 
 ```bash
-# Regenerar CA
-./scripts/cert-manager.sh generate-ca
+# Restaurar DNS del host a configuración original
+./scripts/restore-host.sh
 
-# Reinstalar CA
-./scripts/cert-manager.sh install-ca
-
-# Regenerar certificados
-./scripts/cert-manager.sh generate-wildcard
+# Reinicializar sistema
+./scripts/web-manager.sh init
 ```
 
 ## 📞 Obtener Ayuda
@@ -351,7 +396,6 @@ ls -la backups/
 # Información completa del sistema
 ./scripts/web-manager.sh status
 ./scripts/container-utils.sh info
-./scripts/cert-manager.sh verify
 ```
 
 ### Logs Detallados
@@ -360,8 +404,8 @@ ls -la backups/
 # Logs del sistema
 ./scripts/web-manager.sh logs
 
-# Logs de certificados
-tail -f logs/certificates/*.log
+# Logs de Traefik
+tail -f logs/traefik/traefik.log
 
 # Logs de aplicaciones
 tail -f logs/applications/*.log
@@ -370,9 +414,6 @@ tail -f logs/applications/*.log
 ### Reportes
 
 ```bash
-# Generar reporte de certificados
-./scripts/verify-ssl.sh report
-
 # Generar reporte de descubrimiento
 ./scripts/discover-apps.sh report
 ```
