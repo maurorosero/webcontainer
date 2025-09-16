@@ -1,0 +1,36 @@
+# Configuración DNS local para dominios .local
+# Este archivo se carga automáticamente por los scripts
+
+# Función para resolver dominios .local
+resolve_local_domain() {
+    local domain="$1"
+    if [[ "$domain" == *".local" ]]; then
+        echo "127.0.0.1"
+        return 0
+    fi
+    return 1
+}
+
+# Función para probar resolución
+test_local_domain() {
+    local domain="$1"
+    if resolve_local_domain "$domain"; then
+        echo "✅ $domain -> 127.0.0.1"
+    else
+        echo "❌ $domain no es un dominio .local"
+    fi
+}
+
+# Exportar funciones
+export -f resolve_local_domain
+export -f test_local_domain
+
+# Configurar variables de entorno
+export LOCAL_DNS_ENABLED=true
+export LOCAL_DOMAINS="*.local"
+
+# Mostrar información
+echo "DNS local configurado:"
+echo "  Dominios: *.local"
+echo "  Resolución: 127.0.0.1"
+echo "  Funciones: resolve_local_domain, test_local_domain"

@@ -1,0 +1,50 @@
+# Registro de aplicaciones web
+applications:
+  # Aplicaciones externas (en cualquier ubicación)
+  external:
+    # Ejemplo de aplicación externa
+    # myapp:
+    #   domain: myapp.local.dev
+    #   container_name: web-myapp
+    #   port: 3000
+    #   enabled: true
+    #   description: "Mi Aplicación Node.js"
+    #   health_check: "/health"
+    #   app_path: "/home/user/myapp"
+    #   app_type: "nodejs"
+    #   published_at: "2024-01-15T10:30:00Z"
+    #   last_updated: "2024-01-15T10:30:00Z"
+
+  # Aplicaciones internas (en la plataforma web)
+  internal:
+    # Ejemplo de aplicación interna
+    # odoo:
+    #   domain: odoo.local.dev
+    #   container_name: web-odoo
+    #   port: 8069
+    #   enabled: true
+    #   description: "Sistema ERP Odoo"
+    #   health_check: "/web/health"
+    #   published_at: "2024-01-15T10:30:00Z"
+    #   last_updated: "2024-01-15T10:30:00Z"
+
+# Configuración de dominios
+domains:
+  base_domain: "local.dev"
+  wildcard_cert: true
+  auto_https: true
+  
+# Configuración de red
+network:
+  name: "web-dev-network"
+  subnet: "172.20.0.0/16"
+  gateway: "172.20.0.1"
+  
+# Configuración de publicación
+publishing:
+  auto_reload_caddy: true
+  backup_config: true
+  validate_containers: true
+  health_check_timeout: 30
+  external_apps_enabled: true
+  max_external_apps: 50

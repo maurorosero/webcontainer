@@ -1,0 +1,52 @@
+# Configuración dinámica de Traefik
+http:
+  routers:
+    # Redirección HTTP a HTTPS
+    http-to-https:
+      rule: "HostRegexp(`{host:.+}`)"
+      entrypoints:
+        - web
+      middlewares:
+        - redirect-to-https
+      service: "noop@internal"
+
+  middlewares:
+    # Redirección a HTTPS
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    # Headers de seguridad
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+
+    # CORS para desarrollo
+    cors:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        accessControlAllowHeaders:
+          - "*"
+        accessControlAllowOriginList:
+          - "https://*.local"
+          - "http://*.local"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+
+# Configuración TLS para dominios locales
+tls:
+  options:
+    default:
+      sslProtocols:
+        - "TLSv1.2"
+        - "TLSv1.3"
+      minVersion: "VersionTLS12"

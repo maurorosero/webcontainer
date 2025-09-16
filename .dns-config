@@ -1,0 +1,36 @@
+# Configuración DNS local para desarrollo
+# Este archivo se carga automáticamente por los scripts
+
+# Función para resolver dominios local.dev
+resolve_local_dev() {
+    local domain="$1"
+    if [[ "$domain" == *".local.dev" ]] || [[ "$domain" == "local.dev" ]]; then
+        echo "127.0.0.1"
+        return 0
+    fi
+    return 1
+}
+
+# Función para probar resolución
+test_local_dev() {
+    local domain="$1"
+    if resolve_local_dev "$domain"; then
+        echo "✅ $domain -> 127.0.0.1"
+    else
+        echo "❌ $domain no es un dominio local.dev"
+    fi
+}
+
+# Exportar funciones
+export -f resolve_local_dev
+export -f test_local_dev
+
+# Configurar variables de entorno para aplicaciones
+export LOCAL_DEV_DNS="127.0.0.1"
+export LOCAL_DEV_DOMAINS="*.local.dev,local.dev"
+
+# Mostrar información
+echo "DNS local configurado:"
+echo "  Dominios: *.local.dev"
+echo "  Resolución: 127.0.0.1"
+echo "  Funciones: resolve_local_dev, test_local_dev"

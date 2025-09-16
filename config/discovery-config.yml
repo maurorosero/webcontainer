@@ -1,0 +1,91 @@
+# Configuración de descubrimiento de aplicaciones
+discovery:
+  # Directorios a escanear
+  scan_directories:
+    - "/home"
+    - "/opt"
+    - "/var/www"
+    - "/srv"
+    - "/usr/local"
+  
+  # Patrones de archivos a buscar
+  file_patterns:
+    - "package.json"
+    - "composer.json"
+    - "requirements.txt"
+    - "Cargo.toml"
+    - "go.mod"
+    - "docker-compose.yml"
+    - "docker-compose.yaml"
+    - "Dockerfile"
+    - "index.html"
+    - "index.htm"
+  
+  # Excluir directorios
+  exclude_directories:
+    - "node_modules"
+    - ".git"
+    - ".svn"
+    - "vendor"
+    - "__pycache__"
+    - "target"
+    - "dist"
+    - "build"
+  
+  # Configuración de descubrimiento
+  settings:
+    max_depth: 3
+    follow_symlinks: false
+    include_hidden: false
+    timeout: 30
+
+# Configuración de tipos de aplicación
+app_types:
+  nodejs:
+    indicators:
+      - "package.json"
+    default_port: 3000
+    default_command: "npm start"
+  
+  php:
+    indicators:
+      - "composer.json"
+      - "index.php"
+    default_port: 80
+    default_command: "php -S 0.0.0.0:80"
+  
+  python:
+    indicators:
+      - "requirements.txt"
+      - "app.py"
+      - "manage.py"
+    default_port: 8000
+    default_command: "python -m http.server 8000"
+  
+  rust:
+    indicators:
+      - "Cargo.toml"
+    default_port: 8080
+    default_command: "cargo run"
+  
+  go:
+    indicators:
+      - "go.mod"
+      - "main.go"
+    default_port: 8080
+    default_command: "go run main.go"
+  
+  static:
+    indicators:
+      - "index.html"
+      - "index.htm"
+    default_port: 80
+    default_command: "python -m http.server 80"
+  
+  docker:
+    indicators:
+      - "docker-compose.yml"
+      - "docker-compose.yaml"
+      - "Dockerfile"
+    default_port: 80
+    default_command: "docker-compose up"

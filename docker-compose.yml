@@ -1,0 +1,93 @@
+# docker-compose.yml - Sistema completo con certificados válidos
+version: '3.8'
+
+services:
+  # Servidor Traefik - Proxy reverso con SSL automático
+  traefik:
+    image: docker.io/library/traefik:v3.0
+    container_name: web-traefik
+    hostname: traefik
+    ports:
+      - "8080:80"   # HTTP (puerto seguro para rootless)
+      - "8443:443"  # HTTPS (puerto seguro para rootless)
+      - "8081:8080" # Dashboard (puerto seguro para rootless)
+    volumes:
+      - ${XDG_RUNTIME_DIR}/podman/podman.sock:/var/run/docker.sock:ro
+      - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./config/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./logs/traefik:/var/log/traefik
+      - ./data/traefik:/data
+    networks:
+      - web-dev-network
+    restart: unless-stopped
+    labels:
+      - "app=traefik"
+      - "port=80,443,8080"
+
+  # Servicio de registro de aplicaciones
+  app-registry:
+    image: alpine:latest
+    container_name: web-app-registry
+    hostname: app-registry
+    volumes:
+      - ./config/app-registry.yml:/app-registry.yml:ro
+      - ./scripts:/scripts:ro
+    networks:
+      - web-dev-network
+    command: >
+      sh -c "
+        apk add --no-cache curl jq &&
+        while true; do
+          sleep 30;
+          /scripts/update-caddy-config.sh;
+        done
+      "
+    restart: unless-stopped
+    labels:
+      - "app=registry"
+      - "port=8080"
+
+  # Servidor DNS local
+  dnsmasq:
+    image: docker.io/andyshinn/dnsmasq:latest
+    container_name: web-dnsmasq
+    hostname: dnsmasq
+    ports:
+      - "5354:53/udp"  # DNS en puerto no privilegiado
+      - "5354:53/tcp"  # DNS en puerto no privilegiado
+    volumes:
+      - ./config/dnsmasq.conf:/etc/dnsmasq.conf:ro
+    networks:
+      - web-dev-network
+    restart: unless-stopped
+    labels:
+      - "app=dnsmasq"
+      - "port=5353"
+
+  # Servicio de ejemplo para probar Traefik
+  whoami:
+    image: docker.io/traefik/whoami:latest
+    container_name: web-whoami
+    hostname: whoami
+    networks:
+      - web-dev-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.local`)"
+      - "traefik.http.routers.whoami.entrypoints=web,websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+
+networks:
+  web-dev-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+          gateway: 172.25.0.1
+
+volumes:
+  caddy-data:
+    driver: local
+  app-registry-data:
+    driver: local
