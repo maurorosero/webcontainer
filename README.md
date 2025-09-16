@@ -17,7 +17,7 @@ Sistema completo para desarrollo web local con Traefik como proxy reverso, **dom
 
 ## 🏗️ Arquitectura del Sistema
 
-```
+```text
 Aplicaciones Externas → Detección → Contenedores → Traefik → Cliente
          (cualquier ubicación)        (automático)    (proxy SSL + DNS local)
 ```
@@ -41,6 +41,7 @@ Aplicaciones Externas → Detección → Contenedores → Traefik → Cliente
 ```
 
 Este comando:
+
 - Detecta automáticamente Podman o Docker
 - Configura el host para DNS local automáticamente
 - Inicia dnsmasq en contenedor
@@ -65,7 +66,7 @@ nslookup whoami.local
 
 ## 📁 Estructura del Proyecto
 
-```
+```text
 web/                                 # Plataforma web completa
 ├── scripts/                          # Scripts de gestión
 │   ├── web-manager.sh               # Gestión principal del sistema
@@ -146,11 +147,13 @@ web/                                 # Plataforma web completa
 El sistema configura automáticamente el host para DNS local:
 
 **Al inicializar:**
+
 - Configura systemd-resolved para usar dnsmasq
 - Usa DNS del sistema como fallback automático
 - Dominios .local se resuelven automáticamente
 
 **Al limpiar:**
+
 - Restaura systemd-resolved a configuración original
 - Host vuelve a estado natural
 - Sin rastros de configuración personalizada
