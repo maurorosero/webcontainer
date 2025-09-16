@@ -108,7 +108,7 @@ sudo systemctl start docker  # o podman
 ./scripts/web-manager.sh restart
 
 # Ver logs de contenedor específico
-docker logs web-myapp  # o podman logs web-myapp
+./scripts/container-utils.sh logs web-myapp  # Usa el wrapper automático
 ```
 
 ### Error: "Red no encontrada"
@@ -218,7 +218,7 @@ docker ps | grep caddy  # o podman ps | grep caddy
 docker restart web-caddy  # o podman restart web-caddy
 
 # Ver logs de Caddy
-docker logs web-caddy  # o podman logs web-caddy
+./scripts/container-utils.sh logs web-caddy  # Usa el wrapper automático
 ```
 
 ### Error: "Configuración de Caddy inválida"

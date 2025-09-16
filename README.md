@@ -189,11 +189,18 @@ resolvectl status
 # Verificar motor de contenedores
 ./scripts/container-utils.sh detect
 
-# Verificar estado de contenedores
-podman ps
+# Verificar estado de contenedores (Podman/Docker automático)
+./scripts/container-utils.sh ps
 
-# Ver logs de contenedores
-podman logs web-traefik
+# Ver logs de contenedores (Podman/Docker automático)
+./scripts/container-utils.sh logs web-traefik
+
+# Reiniciar contenedor (Podman/Docker automático)
+./scripts/container-utils.sh restart web-traefik
+
+# Iniciar/Detener contenedor (Podman/Docker automático)
+./scripts/container-utils.sh start web-traefik
+./scripts/container-utils.sh stop web-traefik
 ```
 
 ### Traefik

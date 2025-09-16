@@ -329,7 +329,7 @@ EOF
 ./scripts/web-manager.sh health
 
 # Ver logs de aplicación específica
-docker logs web-my-nodejs-app  # o podman logs web-my-nodejs-app
+./scripts/container-utils.sh logs web-my-nodejs-app  # Usa el wrapper automático
 
 # Verificar configuración de Caddy
 docker exec web-caddy caddy config --config /etc/caddy/Caddyfile

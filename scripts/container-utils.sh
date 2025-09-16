@@ -581,14 +581,38 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         detect)
             detect_container_engine
             ;;
+        ps)
+            list_containers
+            ;;
+        logs)
+            shift
+            container_logs "$@"
+            ;;
+        restart)
+            shift
+            container_restart "$@"
+            ;;
+        start)
+            shift
+            container_start "$@"
+            ;;
+        stop)
+            shift
+            container_stop "$@"
+            ;;
         *)
-            echo "Uso: $0 {init|info|check|detect}"
+            echo "Uso: $0 {init|info|check|detect|ps|logs|restart|start|stop}"
             echo ""
             echo "Comandos disponibles:"
             echo "  init     - Inicializar sistema de contenedores"
             echo "  info     - Mostrar información del sistema"
             echo "  check    - Verificar dependencias"
             echo "  detect   - Detectar motor de contenedores"
+            echo "  ps       - Listar contenedores"
+            echo "  logs     - Ver logs de contenedor"
+            echo "  restart  - Reiniciar contenedor"
+            echo "  start    - Iniciar contenedor"
+            echo "  stop     - Detener contenedor"
             exit 1
             ;;
     esac
