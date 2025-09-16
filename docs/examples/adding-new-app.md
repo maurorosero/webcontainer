@@ -1,10 +1,14 @@
 # Ejemplo: Agregar Nueva Aplicación
 
-Este ejemplo te muestra cómo agregar una nueva aplicación al sistema web local con Traefik.
+Este ejemplo te muestra cómo agregar una nueva aplicación al sistema WebDevs con Traefik.
 
-## 🚀 Ejemplo 1: Aplicación Node.js
+## 🚀 Método: Editar docker-compose.yml
 
-### Crear Aplicación de Prueba
+La forma más directa de agregar aplicaciones es editando el archivo `docker-compose.yml` y reiniciando los servicios.
+
+### Ejemplo 1: Aplicación Node.js
+
+#### Crear Aplicación de Prueba
 
 ```bash
 # Crear directorio de aplicación
@@ -52,11 +56,37 @@ app.listen(port, '0.0.0.0', () => {
 EOF
 ```
 
-### Publicar Aplicación
+### Agregar Node.js al docker-compose.yml
+
+Agrega este servicio al archivo `docker-compose.yml`:
+
+```yaml
+services:
+  # ... servicios existentes ...
+  
+  my-nodejs-app:
+    image: node:18-alpine
+    container_name: web-my-nodejs-app
+    hostname: my-nodejs-app
+    working_dir: /app
+    volumes:
+      - /tmp/my-nodejs-app:/app
+    command: sh -c "npm install && npm start"
+    networks:
+      - web-dev-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.my-nodejs-app.rule=Host(`my-nodejs-app.local`)"
+      - "traefik.http.routers.my-nodejs-app.entrypoints=web,websecure"
+      - "traefik.http.routers.my-nodejs-app.tls=true"
+      - "traefik.http.services.my-nodejs-app.loadbalancer.server.port=3000"
+```
+
+### Reiniciar Servicios para Node.js
 
 ```bash
-# Publicar aplicación
-./scripts/publish-app.sh publish /tmp/my-nodejs-app my-nodejs-app my-nodejs-app.local 3000 "Mi Aplicación Node.js" "/health"
+# Reiniciar servicios para aplicar cambios
+./scripts/web-manager.sh restart
 ```
 
 ### Acceder a la Aplicación Node.js
@@ -64,47 +94,7 @@ EOF
 - **URL**: [https://my-nodejs-app.local:8443](https://my-nodejs-app.local:8443)
 - **Health Check**: [https://my-nodejs-app.local:8443/health](https://my-nodejs-app.local:8443/health)
 
-## 🚀 Ejemplo 2: Aplicación React
-
-### Crear Aplicación React
-
-```bash
-# Crear aplicación React con Vite
-npm create vite@latest /tmp/my-react-app -- --template react
-cd /tmp/my-react-app
-npm install
-```
-
-### Modificar para Desarrollo
-
-```bash
-# Modificar vite.config.js para permitir acceso externo
-cat > vite.config.js << EOF
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: '0.0.0.0',
-    port: 3000
-  }
-})
-EOF
-```
-
-### Publicar Aplicación React
-
-```bash
-# Publicar aplicación React
-./scripts/publish-app.sh publish /tmp/my-react-app my-react-app my-react-app.local 3000 "Mi Aplicación React" "/"
-```
-
-### Acceder a la Aplicación React
-
-- **URL**: [https://my-react-app.local:8443](https://my-react-app.local:8443)
-
-## 🚀 Ejemplo 3: Aplicación PHP
+## 🚀 Ejemplo 2: Aplicación PHP
 
 ### Crear Aplicación PHP
 
@@ -139,11 +129,32 @@ echo json_encode(['status' => 'healthy']);
 EOF
 ```
 
-### Publicar Aplicación PHP
+### Agregar PHP al docker-compose.yml
+
+```yaml
+services:
+  # ... servicios existentes ...
+  
+  my-php-app:
+    image: php:8.2-apache
+    container_name: web-my-php-app
+    hostname: my-php-app
+    volumes:
+      - /tmp/my-php-app:/var/www/html
+    networks:
+      - web-dev-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.my-php-app.rule=Host(`my-php-app.local`)"
+      - "traefik.http.routers.my-php-app.entrypoints=web,websecure"
+      - "traefik.http.routers.my-php-app.tls=true"
+      - "traefik.http.services.my-php-app.loadbalancer.server.port=80"
+```
+
+### Reiniciar Servicios para PHP
 
 ```bash
-# Publicar aplicación PHP
-./scripts/publish-app.sh publish /tmp/my-php-app my-php-app my-php-app.local 80 "Mi Aplicación PHP" "/health.php"
+./scripts/web-manager.sh restart
 ```
 
 ### Acceder a la Aplicación PHP
@@ -151,59 +162,7 @@ EOF
 - **URL**: [https://my-php-app.local:8443](https://my-php-app.local:8443)
 - **Health Check**: [https://my-php-app.local:8443/health.php](https://my-php-app.local:8443/health.php)
 
-## 🚀 Ejemplo 4: Aplicación Python
-
-### Crear Aplicación Python
-
-```bash
-# Crear directorio de aplicación
-mkdir -p /tmp/my-python-app
-cd /tmp/my-python-app
-
-# Crear requirements.txt
-cat > requirements.txt << EOF
-flask==2.3.3
-EOF
-
-# Crear archivo principal
-cat > app.py << EOF
-from flask import Flask, jsonify
-import datetime
-
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return jsonify({
-        'name': 'my-python-app',
-        'description': 'Aplicación Python de ejemplo',
-        'status': 'running',
-        'timestamp': datetime.datetime.now().isoformat(),
-        'python_version': '3.x'
-    })
-
-@app.route('/health')
-def health():
-    return jsonify({'status': 'healthy'})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-EOF
-```
-
-### Publicar Aplicación Python
-
-```bash
-# Publicar aplicación Python
-./scripts/publish-app.sh publish /tmp/my-python-app my-python-app my-python-app.local 5000 "Mi Aplicación Python" "/health"
-```
-
-### Acceder a la Aplicación Python
-
-- **URL**: [https://my-python-app.local:8443](https://my-python-app.local:8443)
-- **Health Check**: [https://my-python-app.local:8443/health](https://my-python-app.local:8443/health)
-
-## 🚀 Ejemplo 5: Sitio Web Estático
+## 🚀 Ejemplo 3: Sitio Web Estático
 
 ### Crear Sitio Estático
 
@@ -267,11 +226,32 @@ cat > index.html << EOF
 EOF
 ```
 
-### Publicar Sitio Estático
+### Agregar Sitio Estático al docker-compose.yml
+
+```yaml
+services:
+  # ... servicios existentes ...
+  
+  my-static-site:
+    image: nginx:alpine
+    container_name: web-my-static-site
+    hostname: my-static-site
+    volumes:
+      - /tmp/my-static-site:/usr/share/nginx/html
+    networks:
+      - web-dev-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.my-static-site.rule=Host(`my-static-site.local`)"
+      - "traefik.http.routers.my-static-site.entrypoints=web,websecure"
+      - "traefik.http.routers.my-static-site.tls=true"
+      - "traefik.http.services.my-static-site.loadbalancer.server.port=80"
+```
+
+### Reiniciar Servicios para Sitio Estático
 
 ```bash
-# Publicar sitio estático
-./scripts/publish-app.sh publish /tmp/my-static-site my-static-site my-static-site.local 80 "Mi Sitio Estático" "/"
+./scripts/web-manager.sh restart
 ```
 
 ### Acceder al Sitio Estático
@@ -280,18 +260,11 @@ EOF
 
 ## 🔍 Verificar Aplicaciones
 
-### Listar Aplicaciones Publicadas
+### Listar Contenedores Activos
 
 ```bash
-# Listar todas las aplicaciones
-./scripts/publish-app.sh list
-```
-
-### Verificar Estado de Aplicaciones
-
-```bash
-# Verificar estado de todas las aplicaciones
-./scripts/publish-app.sh check
+# Ver todos los contenedores activos
+./scripts/container-utils.sh ps
 ```
 
 ### Verificar Estado del Sistema
@@ -304,16 +277,31 @@ EOF
 ./scripts/web-manager.sh health
 ```
 
-## 🗑️ Limpiar Aplicaciones
-
-### Despublicar Aplicación
+### Ver Logs de Aplicaciones
 
 ```bash
-# Despublicar aplicación específica
-./scripts/publish-app.sh unpublish my-nodejs-app
+# Ver logs de aplicación específica
+./scripts/container-utils.sh logs web-my-nodejs-app
+
+# Ver logs de Traefik
+./scripts/container-utils.sh logs web-traefik
 ```
 
-### Limpiar Contenedores
+## 🗑️ Limpiar Aplicaciones
+
+### Eliminar Aplicación
+
+Para eliminar una aplicación:
+
+1. **Editar `docker-compose.yml`** y eliminar el servicio
+2. **Reiniciar servicios** con `./scripts/web-manager.sh restart`
+
+```bash
+# Reiniciar servicios después de eliminar servicio
+./scripts/web-manager.sh restart
+```
+
+### Limpiar Sistema Completo
 
 ```bash
 # Limpiar recursos del sistema
@@ -354,16 +342,17 @@ nslookup my-nodejs-app.local
 # Verificar puertos en uso
 netstat -tlnp | grep :3000
 
-# Usar puerto diferente
-./scripts/publish-app.sh publish /path/to/app app-name domain 3001
+# Cambiar puerto en docker-compose.yml
+# Editar la configuración del servicio y reiniciar
+./scripts/web-manager.sh restart
 ```
 
 ## 📚 Próximos Pasos
 
 1. **Explorar más tipos de aplicación**: Prueba con Rust, Go, etc.
-2. **Configurar monitoreo**: Usa `./scripts/monitor-apps.sh`
-3. **Personalizar configuración**: Edita archivos en `config/`
-4. **Crear aplicaciones reales**: Desarrolla tus propias aplicaciones
+2. **Personalizar configuración**: Edita archivos en `config/`
+3. **Crear aplicaciones reales**: Desarrolla tus propias aplicaciones
+4. **Configurar monitoreo**: Usa los comandos de `web-manager.sh`
 
 ---
 

@@ -202,35 +202,38 @@ cat config/traefik.yml
 
 ## 📱 Problemas de Aplicaciones
 
-### Error: "Aplicación no publicada"
+### Error: "Aplicación no accesible"
 
 **Síntomas**: Aplicación no accesible a través de Traefik
 
 **Solución**:
 
 ```bash
-# Verificar aplicaciones publicadas
-./scripts/publish-app.sh list
+# Verificar contenedores activos
+./scripts/container-utils.sh ps
 
-# Verificar estado de aplicaciones
-./scripts/publish-app.sh check
+# Verificar configuración de Traefik
+./scripts/container-utils.sh logs web-traefik
 
-# Republicar aplicación
-./scripts/publish-app.sh publish /path/to/app app-name app-name.local 3000 "Mi Aplicación" "/health"
+# Verificar etiquetas de Traefik en docker-compose.yml
+cat docker-compose.yml | grep -A 10 "traefik.enable"
 ```
 
-### Error: "Tipo de aplicación no detectado"
+### Error: "Configuración de aplicación incorrecta"
 
-**Síntomas**: Error al detectar tipo de aplicación
+**Síntomas**: Error en la configuración de aplicación
 
 **Solución**:
 
 ```bash
-# Verificar archivos indicadores
-ls -la /path/to/app/
+# Verificar configuración en docker-compose.yml
+cat docker-compose.yml
 
-# Publicar con parámetros específicos
-./scripts/publish-app.sh publish /path/to/app app-name domain port "description" "/health"
+# Verificar etiquetas de Traefik
+grep -A 5 "traefik.enable" docker-compose.yml
+
+# Reiniciar servicios después de cambios
+./scripts/web-manager.sh restart
 ```
 
 ### Error: "Puerto no disponible"
@@ -243,8 +246,9 @@ ls -la /path/to/app/
 # Verificar puertos en uso
 netstat -tlnp | grep :3000
 
-# Usar puerto diferente
-./scripts/publish-app.sh publish /path/to/app app-name domain 3001
+# Cambiar puerto en docker-compose.yml
+# Editar la configuración del servicio y reiniciar
+./scripts/web-manager.sh restart
 ```
 
 ## 🔧 Problemas de Traefik
@@ -433,8 +437,11 @@ tail -f logs/applications/*.log
 ### Reportes
 
 ```bash
-# Generar reporte de descubrimiento
-./scripts/discover-apps.sh report
+# Verificar estado completo del sistema
+./scripts/web-manager.sh status
+
+# Ver logs detallados
+./scripts/web-manager.sh logs
 ```
 
 ---

@@ -105,49 +105,60 @@ El sistema configura automáticamente:
 
 ## 🌐 Publicación de Aplicaciones
 
-### Aplicación Node.js
+**Nota**: La funcionalidad de publicación de aplicaciones externas está en desarrollo. Por ahora, puedes usar el servicio de ejemplo `whoami` que viene incluido.
+
+### Servicio de Ejemplo
+
+El sistema incluye un servicio de ejemplo `whoami` que puedes usar para probar:
 
 ```bash
-# Aplicación en /home/user/myapp con package.json
-./scripts/publish-app.sh publish /home/user/myapp myapp myapp.local 3000 "Mi App Node.js" "/health"
+# Acceder al servicio de ejemplo
+curl https://whoami.local:8443
 ```
 
-### Aplicación React
+### Configuración Manual de Aplicaciones
+
+Para agregar aplicaciones personalizadas, puedes:
+
+1. **Crear un contenedor personalizado** y agregarlo al `docker-compose.yml`
+2. **Configurar las etiquetas de Traefik** para el enrutamiento
+3. **Reiniciar los servicios** con `./scripts/web-manager.sh restart`
+
+Ejemplo de configuración en `docker-compose.yml`:
+
+```yaml
+services:
+  my-app:
+    image: my-app:latest
+    networks:
+      - web-dev-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.my-app.rule=Host(`my-app.local`)"
+      - "traefik.http.routers.my-app.entrypoints=web,websecure"
+      - "traefik.http.routers.my-app.tls=true"
+      - "traefik.http.services.my-app.loadbalancer.server.port=3000"
+```
+
+## 🔍 Gestión de Aplicaciones
+
+### Verificar Aplicaciones Activas
 
 ```bash
-# Aplicación React en /opt/react-app
-./scripts/publish-app.sh publish /opt/react-app react-app react-app.local 3000 "Mi App React" "/"
+# Verificar estado de contenedores
+./scripts/container-utils.sh ps
+
+# Ver logs de aplicaciones específicas
+./scripts/container-utils.sh logs web-whoami
 ```
 
-### Aplicación PHP
+### Agregar Nuevas Aplicaciones
 
-```bash
-# Aplicación PHP en /var/www/myapp
-./scripts/publish-app.sh publish /var/www/myapp myapp myapp.local 80 "Mi App PHP" "/health.php"
-```
+Para agregar nuevas aplicaciones al sistema:
 
-### Aplicación Python
-
-```bash
-# Aplicación Python en /srv/myapp
-./scripts/publish-app.sh publish /srv/myapp myapp myapp.local 8000 "Mi App Python" "/health"
-```
-
-## 🔍 Descubrimiento de Aplicaciones
-
-### Escanear Sistema Completo
-
-```bash
-# Descubrir todas las aplicaciones en el sistema
-./scripts/discover-apps.sh discover
-```
-
-### Escanear Directorio Específico
-
-```bash
-# Escanear directorio específico con profundidad máxima
-./scripts/discover-apps.sh scan /home/user 2
-```
+1. **Editar `docker-compose.yml`** para agregar el nuevo servicio
+2. **Configurar etiquetas de Traefik** para el enrutamiento
+3. **Reiniciar servicios** con `./scripts/web-manager.sh restart`
 
 ## 📊 Monitoreo y Gestión
 
@@ -177,17 +188,17 @@ El sistema configura automáticamente:
 ./scripts/container-utils.sh restart web-traefik
 ```
 
-### Gestión de Aplicaciones
+### Gestión de Servicios
 
 ```bash
-# Listar aplicaciones publicadas
-./scripts/publish-app.sh list
+# Listar contenedores activos
+./scripts/container-utils.sh ps
 
-# Verificar estado de aplicaciones
-./scripts/publish-app.sh check
+# Ver logs de contenedor específico
+./scripts/container-utils.sh logs web-traefik
 
-# Despublicar aplicación
-./scripts/publish-app.sh unpublish myapp
+# Reiniciar contenedor específico
+./scripts/container-utils.sh restart web-traefik
 ```
 
 ## 💾 Backup y Restauración
@@ -276,8 +287,8 @@ cat config/traefik.yml
 
 ## 📚 Próximos Pasos
 
-1. **Publicar tu primera aplicación**: Usa `./scripts/publish-app.sh publish`
-2. **Configurar monitoreo**: Usa `./scripts/monitor-apps.sh`
+1. **Probar el servicio de ejemplo**: Accede a `https://whoami.local:8443`
+2. **Agregar tu primera aplicación**: Edita `docker-compose.yml` y reinicia servicios
 3. **Personalizar configuración**: Edita archivos en `config/`
 4. **Explorar documentación**: Revisa otros archivos en `docs/`
 
